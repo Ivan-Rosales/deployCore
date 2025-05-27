@@ -3,18 +3,16 @@
 # Script Name:      setup-dockerization.sh
 # Author:           Giovanni Trujillo Silvas (gtrujill0@outlook.com)
 # Created:          2025-05-24
-# Last Modified:    2025-05-24
+# Last Modified:    2025-05-26
 # Description:      Automate Dockerization of Projects
 ############################################################
 
 DOCKERFILE="Dockerfile"
 COMPOSEFILE="docker-compose.yml"
 DOCKERIGNORE=".dockerignore"
-DEPS="install-deps.sh"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 API_ID="$(basename "$SCRIPT_DIR" | sed 's/[^a-zA-Z0-9_]/_/g')"
-INTERNAL_PORT=8000
-PORT_START=8001
+PORT_START=8000
 PORT_END=8999
 
 # Verificación de dependencias
@@ -27,7 +25,7 @@ done
 
 
 # Verificación de archivos existentes
-for file in "$DEPS" "$DOCKERFILE" "$COMPOSEFILE" "$DOCKERIGNORE"; do
+for file in "$DOCKERFILE" "$COMPOSEFILE" "$DOCKERIGNORE"; do
     if [ -f "$file" ]; then
         read -p "⚠️  El archivo '$file' ya existe. ¿Deseas sobrescribirlo? [s/N]: " answer
         if [[ ! "$answer" =~ ^[Ss]$ ]]; then
@@ -85,46 +83,20 @@ EOF
 
 echo "✅ .dockerignore generado."
 
-# Generación del script de instalación de dependencias
-echo "🛠️ Generando archivo $DEPS..."
-
-cat <<EOF > $DEPS
-#!/bin/bash
-set -e
-
-if [ -f "pyproject.toml" ] && [ -f "poetry.lock" ]; then
-    echo "📦 Instalando dependencias con Poetry..."
-    curl -sSL https://install.python-poetry.org | python3 -
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
-    poetry config virtualenvs.create false
-    poetry install --no-interaction --no-ansi
-elif [ -f "requirements.txt" ]; then
-    echo "📦 Instalando dependencias con pip (requirements.txt)..."
-    pip install --no-cache-dir -r requirements.txt
-else
-    echo "❌ No se encontraron ni pyproject.toml/poetry.lock ni requirements.txt"
-    exit 1
-fi
-EOF
-
-chmod +x install-deps.sh
-echo "✅ $DEPS generado."
 
 # Generación del Dockerfile
 echo "🛠️ Generando archivo $DOCKERFILE..."
 
-COPY_LINE=""
-[ -f "requirements.txt" ] && COPY_LINE+="COPY requirements.txt ./\n"
-[ -f "pyproject.toml" ] && COPY_LINE+="COPY pyproject.toml ./\n"
-[ -f "poetry.lock" ] && COPY_LINE+="COPY poetry.lock ./\n"
-COPY_LINE+="COPY install-deps.sh ./\n"
+REQUIREMENTS=""
+[ -f "requirements.txt" ] && REQUIREMENTS+="RUN pip install --no-cache-dir -r requirements.txt"
+[ -f "pyproject.toml" ] && REQUIREMENTS+="RUN pip install ."
+
 
 {
 cat <<EOF
 # Imagen base
 FROM python:3.12-slim
 
-ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -133,23 +105,35 @@ WORKDIR /$API_ID
 RUN apt-get update && apt-get install -y \\
     build-essential \\
     libpq-dev \\
+    unixodbc \\
     curl \\
     && rm -rf /var/lib/apt/lists/*
+
+RUN curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb && \\
+    dpkg -i packages-microsoft-prod.deb && \\
+    rm packages-microsoft-prod.deb
+
+RUN apt-get update && \\
+    ACCEPT_EULA=Y apt-get install -y msodbcsql17
+
+RUN rm -rf /var/lib/apt/lists/*
+
+COPY . .
+
+RUN pip install gunicorn
+RUN pip install --upgrade pip
+
 
 EOF
 
 # Insertar el bloque COPY con saltos reales
-echo -e "$COPY_LINE"
+echo -e "$REQUIREMENTS"
 
 cat <<EOF
-COPY README.md ./
-RUN chmod +x install-deps.sh && ./install-deps.sh
 
-COPY . .
+EXPOSE $PORT_LOCAL
 
-EXPOSE $INTERNAL_PORT
-
-CMD ["gunicorn", "$API_ID.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "$API_ID.wsgi:application", "--bind", "0.0.0.0:$PORT_LOCAL", "--workers", "3"]
 
 EOF
 } > "$DOCKERFILE"
@@ -165,13 +149,11 @@ version: '3.9'
 services:
   api:
     container_name: "$API_ID"
-    network_mode: "host"
+    network_mode: host
     build: .
-    command: gunicorn $API_ID.wsgi:application --bind 0.0.0.0:$INTERNAL_PORT
+    command: gunicorn $API_ID.wsgi:application --bind 0.0.0.0:$PORT_LOCAL
     volumes:
       - .:/$API_ID
-    ports:
-      - "$PORT_LOCAL:$INTERNAL_PORT"
     env_file:
       - ../.env
 EOF
@@ -180,4 +162,4 @@ echo "✅ docker-compose.yml generado con puerto: $PORT_LOCAL"
 echo "🚀 Ejecuta desde el directorio donde está este script:"
 echo "   make up"
 echo "   o"
-echo "   docker-compose up --build"
+echo "   docker-compose up -d --build"
