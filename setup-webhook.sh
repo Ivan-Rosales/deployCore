@@ -33,7 +33,7 @@ done
 # Crear directorios necesarios
 sudo mkdir -p "$HOOKS_DIR/logs"
 sudo chown root:root "$HOOKS_DIR/logs"
-sudo chmod 755 "$HOOKS_DIR/logs"
+sudo chmod 755 "$HOOKSa_DIR/logs"
 
 # Evitar sobreescribir hook ya existente
 if [[ -e "$DEPLOY_SCRIPT" ]]; then
@@ -166,7 +166,7 @@ ExecStart=/usr/bin/webhook -hooks ${HOOKS_FILE} -port 60001
 WorkingDirectory=${HOOKS_DIR}
 Restart=always
 RestartSec=3
-User=root
+User=sistemasweb
 KillMode=process
 ExecReload=/bin/kill -HUP \$MAINPID
 StandardOutput=journal
@@ -183,7 +183,8 @@ fi
 
 # Se añade directorio como un "safe directory" para Git, ejecutado como root
 sudo -u root git config --global --add safe.directory "$SCRIPT_DIR"
-
+sudo -u sistemasweb git config --global --add safe.directory "$SCRIPT_DIR"
+sudo chown sistemasweb:sistemasweb $HOOKS_DIR
 # Reiniciar servicio para cargar nuevo hook
 echo "🔄 Reiniciando servicio webhook para aplicar cambios..."
 sudo systemctl restart webhook.service
