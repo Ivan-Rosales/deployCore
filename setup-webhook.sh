@@ -33,7 +33,7 @@ done
 # Crear directorios necesarios
 sudo mkdir -p "$HOOKS_DIR/logs"
 sudo chown root:root "$HOOKS_DIR/logs"
-sudo chmod 755 "$HOOKSa_DIR/logs"
+sudo chmod 755 "$HOOKS_DIR/logs"
 
 # Evitar sobreescribir hook ya existente
 if [[ -e "$DEPLOY_SCRIPT" ]]; then

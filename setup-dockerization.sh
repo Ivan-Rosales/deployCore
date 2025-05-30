@@ -102,23 +102,59 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /$API_ID
 
-RUN apt-get update && apt-get install -y \\
-    build-essential \\
-    libpq-dev \\
-    unixodbc \\
-    curl \\
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update
 
-RUN curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb && \\
-    dpkg -i packages-microsoft-prod.deb && \\
+RUN apt-get install -y \
+    curl \
+    wget \
+    build-essential
+
+RUN curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
     rm packages-microsoft-prod.deb
 
-RUN apt-get update && \\
-    ACCEPT_EULA=Y apt-get install -y msodbcsql17
+RUN apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql17
 
-RUN rm -rf /var/lib/apt/lists/*
+RUN wget https://www.openssl.org/source/openssl-3.0.2.tar.gz
+RUN tar -xzvf openssl-3.0.2.tar.gz
+
+WORKDIR /code/openssl-3.0.2
+RUN ./config
+RUN make -j$(nproc)
+RUN make install
+WORKDIR /code
 
 COPY . .
+
+RUN sed -i 's|openssl_conf = openssl_init|openssl_conf = default_conf|' /etc/ssl/openssl.cnf
+RUN sed -i 's|# \[openssl_init\]|[openssl_init]|' /etc/ssl/openssl.cnf
+RUN sed -i 's|providers = provider_sect|providers = provider_sect\nssl_conf = ssl_sect|' /etc/ssl/openssl.cnf
+
+RUN sed -i 's|# \[provider_sect\]|[provider_sect]|' /etc/ssl/openssl.cnf
+RUN sed -i 's|default = default_sect|default = default_sect\nlegacy = legacy_sect|' /etc/ssl/openssl.cnf
+
+RUN sed -i 's|# \[default_sect\]|[default_sect]|' /etc/ssl/openssl.cnf
+RUN sed -i 's|# activate = 1|activate = 1|' /etc/ssl/openssl.cnf
+
+RUN sed -i 's|# out_trusted = apps/insta.ca.crt|out_trusted = insta.ca.crt|' /etc/ssl/openssl.cnf
+RUN sed -i 's|# trusted = \$insta::out_trusted|trusted = insta.ca.crt|' /etc/ssl/openssl.cnf
+
+# Añadir las secciones [ssl_sect], [system_default_sect], [default_conf] y [system_default_sect] al final
+RUN echo "[ssl_sect]" >> /etc/ssl/openssl.cnf
+RUN echo "system_default = system_default_sect" >> /etc/ssl/openssl.cnf
+RUN echo "[system_default_sect]" >> /etc/ssl/openssl.cnf
+RUN echo "CipherString = DEFAULT:@SECLEVEL=0" >> /etc/ssl/openssl.cnf
+RUN echo "[default_conf]" >> /etc/ssl/openssl.cnf
+RUN echo "ssl_conf = ssl_sect" >> /etc/ssl/openssl.cnf
+RUN echo "[ssl_sect]" >> /etc/ssl/openssl.cnf
+RUN echo "system_default = system_default_sect" >> /etc/ssl/openssl.cnf
+RUN echo "[system_default_sect]" >> /etc/ssl/openssl.cnf
+RUN echo "MinProtocol = TLSv1.0" >> /etc/ssl/openssl.cnf
+RUN echo "CipherString = DEFAULT:@SECLEVEL=0" >> /etc/ssl/openssl.cnf
+
+# Limpieza
+RUN rm -rf /code/openssl-3.0.2/
+RUN rm /code/openssl-3.0.2.tar.gz
 
 RUN pip install gunicorn
 RUN pip install --upgrade pip
