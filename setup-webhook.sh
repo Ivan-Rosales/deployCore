@@ -32,7 +32,7 @@ done
 
 # Crear directorios necesarios
 sudo mkdir -p "$HOOKS_DIR/logs"
-sudo chown root:root "$HOOKS_DIR/logs"
+sudo chown sistemasweb:sistemasweb "$HOOKS_DIR/logs"
 sudo chmod 755 "$HOOKS_DIR/logs"
 
 # Evitar sobreescribir hook ya existente
@@ -103,7 +103,7 @@ EOF
 
 chmod +x "$DEPLOY_SCRIPT"
 sudo chmod +x "$DEPLOY_SCRIPT"
-sudo chown root:root "$DEPLOY_SCRIPT"
+sudo chown sistemasweb:sistemasweb "$DEPLOY_SCRIPT"
 
 # Crear o reutilizar token en .env
 if [ ! -f "$ENV_FILE" ]; then
@@ -182,20 +182,21 @@ EOF
 fi
 
 # Se añade directorio como un "safe directory" para Git, ejecutado como root
-sudo -u root git config --global --add safe.directory "$SCRIPT_DIR"
 sudo -u sistemasweb git config --global --add safe.directory "$SCRIPT_DIR"
+
 sudo chown sistemasweb:sistemasweb $HOOKS_DIR
+sudo chown sistemasweb:sistemasweb $SERVICE_FILE
 # Reiniciar servicio para cargar nuevo hook
 echo "🔄 Reiniciando servicio webhook para aplicar cambios..."
 sudo systemctl restart webhook.service
 
 # Mensajes finales
 echo ""
-echo "✅ Webhook $APP_ID configurado y corriendo en puerto 60001."
+echo "✅ Webhook $APP_ID configurado y corriendo en puerto 60100."
 echo "🔐 Token secreto: $SECRET_TOKEN"
 echo ""
 echo "Puedes probarlo con:"
-echo "curl -X POST http://localhost:60001/hooks/$APP_ID \\"
+echo "curl -X POST http://3.221.180.168:60100/hooks/$APP_ID \\"
 echo "     -H 'Content-Type: application/json' \\"
 echo "     -H 'X-Hub-Token: $SECRET_TOKEN' \\"
 echo "     -d '{\"ref\": \"refs/heads/main\"}'"

@@ -118,11 +118,11 @@ RUN apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql17
 RUN wget https://www.openssl.org/source/openssl-3.0.2.tar.gz
 RUN tar -xzvf openssl-3.0.2.tar.gz
 
-WORKDIR /code/openssl-3.0.2
+WORKDIR /$API_ID/openssl-3.0.2
 RUN ./config
 RUN make -j$(nproc)
 RUN make install
-WORKDIR /code
+WORKDIR /$API_ID
 
 COPY . .
 
@@ -153,8 +153,8 @@ RUN echo "MinProtocol = TLSv1.0" >> /etc/ssl/openssl.cnf
 RUN echo "CipherString = DEFAULT:@SECLEVEL=0" >> /etc/ssl/openssl.cnf
 
 # Limpieza
-RUN rm -rf /code/openssl-3.0.2/
-RUN rm /code/openssl-3.0.2.tar.gz
+RUN rm -rf /$API_ID/openssl-3.0.2/
+RUN rm /$API_ID/openssl-3.0.2.tar.gz
 
 RUN pip install gunicorn
 RUN pip install --upgrade pip
