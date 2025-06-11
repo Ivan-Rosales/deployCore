@@ -3,7 +3,7 @@
 # Script Name:      setup-webhook.sh
 # Author:           Giovanni Trujillo Silvas (gtrujill0@outlook.com)
 # Created:          2025-05-21
-# Last Modified:    2025-05-23
+# Last Modified:    2025-06-11
 # Description:      Automatiza la configuración de webhooks
 # License:          MIT
 ############################################################
@@ -21,6 +21,7 @@ DEPLOY_SCRIPT="$HOOKS_DIR/${APP_ID}.sh"
 ENV_FILE="$HOOKS_DIR/.env"
 SERVICE_FILE="/etc/systemd/system/webhook.service"
 LOG_FILE="$HOOKS_DIR/logs/${APP_ID}.log"
+OWNER_USER="root"
 
 # Validar herramientas necesarias
 for cmd in git docker docker-compose jq openssl; do
@@ -30,9 +31,13 @@ for cmd in git docker docker-compose jq openssl; do
   fi
 done
 
+if id "sistemasweb" &>/dev/null; then
+    OWNER_USER="sistemasweb"
+fi
+
 # Crear directorios necesarios
 sudo mkdir -p "$HOOKS_DIR/logs"
-sudo chown sistemasweb:sistemasweb "$HOOKS_DIR/logs"
+sudo chown "$OWNER_USER":"$OWNER_USER" "$HOOKS_DIR/logs"
 sudo chmod 755 "$HOOKS_DIR/logs"
 
 # Evitar sobreescribir hook ya existente
@@ -103,7 +108,7 @@ EOF
 
 chmod +x "$DEPLOY_SCRIPT"
 sudo chmod +x "$DEPLOY_SCRIPT"
-sudo chown sistemasweb:sistemasweb "$DEPLOY_SCRIPT"
+sudo chown "$OWNER_USER":"$OWNER_USER" "$DEPLOY_SCRIPT"
 
 # Crear o reutilizar token en .env
 if [ ! -f "$ENV_FILE" ]; then
@@ -166,7 +171,7 @@ ExecStart=/usr/bin/webhook -hooks ${HOOKS_FILE} -port 60001
 WorkingDirectory=${HOOKS_DIR}
 Restart=always
 RestartSec=3
-User=sistemasweb
+User=${OWNER_USER}
 KillMode=process
 ExecReload=/bin/kill -HUP \$MAINPID
 StandardOutput=journal
@@ -181,14 +186,17 @@ EOF
   sudo systemctl enable webhook.service
 fi
 
-# Se añade directorio como un "safe directory" para Git, ejecutado como root
-sudo -u sistemasweb git config --global --add safe.directory "$SCRIPT_DIR"
+# Se añade directorio como un "safe directory" para Git
+sudo -u "$OWNER_USER" git config --global --add safe.directory "$SCRIPT_DIR"
 
-sudo chown sistemasweb:sistemasweb $HOOKS_DIR
-sudo chown sistemasweb:sistemasweb $SERVICE_FILE
+sudo chown "$OWNER_USER":"$OWNER_USER" $HOOKS_DIR
+sudo chown "$OWNER_USER":"$OWNER_USER" $SERVICE_FILE
 # Reiniciar servicio para cargar nuevo hook
 echo "🔄 Reiniciando servicio webhook para aplicar cambios..."
 sudo systemctl restart webhook.service
+
+# Se optiene la IP pública del servidor
+IP_PUBLICA=$(curl -s ipinfo.io/ip)
 
 # Mensajes finales
 echo ""
@@ -196,7 +204,7 @@ echo "✅ Webhook $APP_ID configurado y corriendo en puerto 60100."
 echo "🔐 Token secreto: $SECRET_TOKEN"
 echo ""
 echo "Puedes probarlo con:"
-echo "curl -X POST http://3.221.180.168:60100/hooks/$APP_ID \\"
+echo "curl -X POST http://$IP_PUBLICA:60100/hooks/$APP_ID \\"
 echo "     -H 'Content-Type: application/json' \\"
 echo "     -H 'X-Hub-Token: $SECRET_TOKEN' \\"
 echo "     -d '{\"ref\": \"refs/heads/main\"}'"
