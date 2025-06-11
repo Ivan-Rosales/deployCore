@@ -13,6 +13,7 @@ Su objetivo es acelerar la integración y despliegue continuo de servicios backe
 2. [🛠️ Comandos disponibles (Makefile)](#comandos-disponibles-makefile)
 3. [📦 Requisitos Previos](#requisitos-previos)
 4. [⚙️ Instalación del Proyecto](#instalacion-del-proyecto)
+5. [🛰️ Configuración de Hook en Linux para Aplicación Dockerizada](#configuracion-hook)
 5. [📌 Notas](#notas)
 6. [✅ Buenas Prácticas en Commits](#buenas-practicas-en-commits)
 7. [🧑‍💻 Autor](#autor)
@@ -130,7 +131,7 @@ make up
 
 ---
 
-## 🚀 Configuración de Hook en Linux para Aplicación Dockerizada
+## 🛰️ Configuración de Hook en Linux para Aplicación Dockerizada <a name="configuracion-hook"></a>
 
 Este repositorio permite configurar un **webhook automatizado en un servidor Linux**, el cual actualiza automáticamente tu aplicación dockerizada cuando se detecta un evento (por ejemplo, un push en Git).
 
@@ -157,7 +158,7 @@ Guarda el script en el repositorio con:
 
 ```bash
 git add setup-webhook.sh
-git commit -m "FEAT:Agregar script de setup de webhook"
+git commit -m "CI:Agregar script de setup de webhook"
 git push origin main  # o la rama correspondiente
 ```
 
@@ -189,29 +190,62 @@ Ubícate en el directorio designado por el administrador del servidor y clona el
 git clone https://tu-repositorio.git
 cd nombre-del-repositorio
 ```
-#### 6️⃣ Ejecusion con Makefile de repositorio
-Sí esta usando el makefile que se encuentra en este repositorio, puede ejecutar el setup del hook con el siguiente comando, y saltarse hasta el paso 8.
-```bash
-make setup-webhook
-```
-Sí no usa makefile, favor de realizar los siguientes 2 pasos.
+
+#### 6️⃣ Configuración del Webhook
+
+Puedes configurar el webhook utilizando el `Makefile` provisto en este repositorio (opción recomendada) o de forma manual.
 
 ---
-#### 6️⃣ Otorgar Permisos de Ejecución al Script
+
+##### ⚙️ Opción A: Usar el `Makefile`
+
+Si estás utilizando el `Makefile` del repositorio, simplemente ejecuta el siguiente comando:
+
+```bash
+make setup-webhook branch=nombre_rama
+```
+
+- Si no se especifica una rama, se usará `main` por defecto.
+
+###### 🔍 Ejemplos:
+```bash
+make setup-webhook branch=develop   # Usará la rama 'develop'
+make setup-webhook                  # Usará la rama 'main' (por defecto)
+```
+
+✅ Ideal para levantar el hook en ramas como `develop` para entornos de pruebas, o `main` para entornos de producción.
+
+---
+
+##### 🛠️ Opción B: Ejecución Manual
+
+Si no utilizas `make`, puedes configurar el hook manualmente en dos pasos:
+
+###### 1. Dar permisos de ejecución al script
 
 ```bash
 sudo chmod +x setup-webhook.sh
 ```
 
-#### 7️⃣ Ejecutar el Script
+###### 2. Ejecutar el script con la rama deseada
 
 ```bash
-sudo ./setup-webhook.sh
+sudo ./setup-webhook.sh nombre_rama
 ```
+
+- Si no se especifica una rama, se usará `main` por defecto.
+
+###### 🔍 Ejemplos:
+```bash
+sudo ./setup-webhook.sh develop   # Usará la rama 'develop'
+sudo ./setup-webhook.sh          # Usará la rama 'main' (por defecto)
+```
+
+✅ Esta opción es útil si no deseas usar `make` o estás integrando el hook en un entorno más personalizado.
 
 ---
 
-### 🔗 8️⃣ Configurar el Webhook en Git
+### 🔗 7️⃣ Configurar el Webhook en Git
 
 Una vez ejecutado el script, este devolverá una **URL única** para el webhook. Deberás:
 
@@ -222,9 +256,8 @@ Una vez ejecutado el script, este devolverá una **URL única** para el webhook.
 5. Configura los siguientes valores:
   - **Payload URL**: `http://<tu-dominio-o-ip>:<puerto-configurado>/webhook`
   - **Content type**: `application/json`
-  - **Secret**: Usa el token definido en tu Makefile (`make setup-webhook`)
+  - **Secret**: Usa el token que devolvio la ejecusion del sh
   - **Events**: Seleccionar los eventos que deseas monitorear (por ejemplo, `push`).
-
 
 ---
 

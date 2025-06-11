@@ -9,10 +9,18 @@
 ############################################################
 
 set -euo pipefail
+# Asignacion de variables
+BRANCH=${1:-main}
+OWNER_USER="root"
 
 # Obtener nombre de la app basado en la carpeta
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_ID="webhook-$(basename "$SCRIPT_DIR" | sed 's/[^a-zA-Z0-9_]/_/g')"
+
+# Valida si la rama es diferente de main para concatener al ID de la app
+if [ "$BRANCH" != "main" ]; then
+  APP_ID="${APP_ID}-${BRANCH}"
+fi
 
 # Rutas principales
 HOOKS_DIR="/opt/hooks"
@@ -21,7 +29,8 @@ DEPLOY_SCRIPT="$HOOKS_DIR/${APP_ID}.sh"
 ENV_FILE="$HOOKS_DIR/.env"
 SERVICE_FILE="/etc/systemd/system/webhook.service"
 LOG_FILE="$HOOKS_DIR/logs/${APP_ID}.log"
-OWNER_USER="root"
+
+
 
 # Validar herramientas necesarias
 for cmd in git docker docker-compose jq openssl; do
@@ -81,8 +90,14 @@ cd "\$PROJECT_DIR" || {
 
 {
   echo "➡️  Haciendo pull de cambios desde Git..."
-  if ! git pull origin main >> "\$LOGFILE" 2>&1; then
-    echo "❌ Error en git pull" >> "\$LOGFILE"
+  if ! git checkout ${BRANCH} >> "\$LOGFILE" 2>&1; then
+    echo "❌ Error en git checkout " >> "\$LOGFILE"
+    exit 1
+  fi
+
+  echo "➡️  Haciendo pull de cambios desde Git..."
+  if ! git pull origin ${BRANCH} >> "\$LOGFILE" 2>&1; then
+    echo "❌ Error en git pull " >> "\$LOGFILE"
     exit 1
   fi
 

@@ -25,5 +25,10 @@ setup-webhook:
 	@echo "🔓 Otorgando permisos de ejecución al script..."
 	sudo chmod +x setup-webhook.sh
 	@echo "🚧 Ejecutando script de setup webhook..."
-	sudo ./setup-webhook.sh
-
+	@if [ -z "$(branch)" ]; then \
+		echo "Usando rama por defecto: main"; \
+		sudo ./setup-webhook.sh; \
+	else \
+		echo "Usando rama: $(branch)"; \
+		sudo ./setup-webhook.sh $(branch); \
+	fi
