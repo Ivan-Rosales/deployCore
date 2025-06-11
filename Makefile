@@ -21,9 +21,9 @@ rebuild:
 	docker-compose build --no-cache
 
 # Hooks
-webhook-setup:
+setup-webhook:
 	@echo "🔓 Otorgando permisos de ejecución al script..."
-	chmod +x setup-webhook.sh
+	sudo chmod +x setup-webhook.sh
 	@echo "🚧 Ejecutando script de setup webhook..."
 	sudo ./setup-webhook.sh
 
