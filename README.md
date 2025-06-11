@@ -130,23 +130,130 @@ make up
 
 ---
 
-### 3. Instalar Webhook para despliegue automático
+## 🚀 Configuración de Hook en Linux para Aplicación Dockerizada
+
+Este repositorio permite configurar un **webhook automatizado en un servidor Linux**, el cual actualiza automáticamente tu aplicación dockerizada cuando se detecta un evento (por ejemplo, un push en Git).
+
+---
+
+### ✅ Requisitos Previos
+
+- Docker y Docker Compose instalados en el servidor.
+- La aplicación cuenta con un `Dockerfile` y un `docker-compose.yml`.
+- Acceso SSH al servidor donde se desplegará la app.
+- Script `setup-webhook.sh` previamente probado (proporcionado en este repositorio).
+
+---
+
+### 🛠️ Pasos para Configurar el Hook
+
+#### 1️⃣ Copiar el Script `setup-webhook.sh` al Repositorio del Proyecto
+
+Coloca el archivo `setup-webhook.sh` en la raíz del repositorio del proyecto que deseas automatizar.
+
+#### 2️⃣ Hacer Commit y Push del Script
+
+Guarda el script en el repositorio con:
 
 ```bash
+git add setup-webhook.sh
+git commit -m "FEAT:Agregar script de setup de webhook"
+git push origin main  # o la rama correspondiente
+```
+
+#### 3️⃣ Ignorar el Script en `.gitignore`
+
+Agrega la siguiente línea a tu archivo `.gitignore`:
+
+```
+setup-webhook.sh
+```
+
+📌 **Importante:** El script requiere permisos especiales en el servidor, por lo tanto es mejor mantenerlo fuera del control de versiones después del primer uso para evitar conflictos con Git.
+
+---
+
+#### 4️⃣ Ingresar al Servidor
+
+Conéctate al servidor vía SSH donde se desplegará la aplicación:
+
+```bash
+ssh usuario@tu-servidor
+```
+
+#### 5️⃣ Clonar el Repositorio
+
+Ubícate en el directorio designado por el administrador del servidor y clona el repositorio:
+
+```bash
+git clone https://tu-repositorio.git
+cd nombre-del-repositorio
+```
+#### 6️⃣ Ejecusion con Makefile de repositorio
+Sí esta usando el makefile que se encuentra en este repositorio, puede ejecutar el setup del hook con el siguiente comando, y saltarse hasta el paso 8.
+```bash
 make setup-webhook
+```
+Sí no usa makefile, favor de realizar los siguientes 2 pasos.
+
+---
+#### 6️⃣ Otorgar Permisos de Ejecución al Script
+
+```bash
+sudo chmod +x setup-webhook.sh
+```
+
+#### 7️⃣ Ejecutar el Script
+
+```bash
+sudo ./setup-webhook.sh
 ```
 
 ---
 
-### 4. Configurar Webhook en GitHub-GitLab
+### 🔗 8️⃣ Configurar el Webhook en Git
 
-- Dirígete a tu repositorio en GitHub o GitLab → **Settings** → **Webhooks** → **Add webhook**
-- Configura los siguientes valores:
+Una vez ejecutado el script, este devolverá una **URL única** para el webhook. Deberás:
 
+1. Ingresar a la configuración de tu repositorio en GitHub/GitLab/etc.
+2. Ir a la sección **Webhooks**.
+3. Crear un nuevo webhook.
+4. Pegar la URL generada.
+5. Configura los siguientes valores:
   - **Payload URL**: `http://<tu-dominio-o-ip>:<puerto-configurado>/webhook`
   - **Content type**: `application/json`
   - **Secret**: Usa el token definido en tu Makefile (`make setup-webhook`)
-  - **Events**: Selecciona `Just the push event`
+  - **Events**: Seleccionar los eventos que deseas monitorear (por ejemplo, `push`).
+
+
+---
+
+### 📌 Importante sobre el Pull de Código
+
+El hook está **configurado para hacer siempre `git pull` desde la rama `main`**, lo que permite tener un flujo de desarrollo más controlado y predecible.
+
+Esto facilita:
+
+- Controlar versiones usando **releases**.
+- Validar cambios mediante **pull requests** o **merge requests**.
+- Desplegar únicamente código aprobado o estable.
+
+> ⚠️ Asegúrate de realizar merges correctamente hacia `main` para que los cambios sean desplegados automáticamente por el hook.
+
+---
+
+### ⚠️ Recomendaciones Adicionales
+
+- ✅ **Mantén limpio el estado del repositorio en el servidor.**  
+  Evita tener cambios pendientes de commit, ya que esto generará errores cuando el webhook intente hacer `git pull`.
+
+- 🧪 Puedes probar el webhook haciendo un push manual desde Git para verificar que la actualización se realiza correctamente.
+
+---
+
+### 📞 Soporte
+
+Para dudas o errores, contacta con tu administrador de servidor o abre un issue en el repositorio del proyecto.
 
 ---
 
