@@ -169,7 +169,7 @@ git flow feature start DeployCore
 
 #### 2️⃣ Clonar DeployCore
     ```bash
-    git clone https://github.com/usuario/otro-repo.git temp-folder  # Repo Actual
+    git clone https://github.com/GtrujilloTS/deployCore.git temp-folder  # Repo Actual
     mv temp-folder/* .
     rm -rf temp-folder
     ```
