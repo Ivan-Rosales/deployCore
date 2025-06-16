@@ -20,6 +20,12 @@ clean:
 rebuild:
 	docker-compose build --no-cache
 
+ports:
+	@echo "🔓 Otorgando permisos de ejecución al script..."
+	sudo chmod +x setup-webhook.sh	
+	@echo "🚧 Ejecutando script de setup webhook..."
+	sudo ./free-port.sh;
+
 # Hooks
 setup-webhook:
 	@echo "🔓 Otorgando permisos de ejecución al script..."

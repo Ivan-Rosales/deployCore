@@ -45,9 +45,9 @@ myproject/
    |     ├── .env.template          # Plantilla de variables de entorno
    |     └── README.md              # Documentacion de directorio
    ├── .gitignore                   # Exclusión de archivos en Git
-   ├── activaSitio.sh               # Script para dar de alta aplicacion en Nginx
+   ├── activate-site.sh             # Script para dar de alta aplicacion en Nginx
    ├── Makefile                     # Automatización con Make
-   ├── puerto-disponible.sh         # Script para buscar puertos libres en servidor
+   ├── free-port.sh                 # Script para buscar puertos libres en servidor
    ├── docker-compose.yml           # Orquestación local
    ├── Dockerfile                   # Imagen base del proyecto
    ├── README.md                    # Documentación principal
@@ -158,7 +158,7 @@ rm -rf temp-folder
 #### 2.2 Agregar y confirmar los archivos iniciales
 
 ```bash
-git add Makefile setup-webhook.sh setup-webhook.sh.sig deploy-api.sh setup-dockerization.sh DeployCore.md activaSitio.sh puerto-disponible.sh
+git add Makefile setup-webhook.sh setup-webhook.sh.sig deploy-api.sh setup-dockerization.sh DeployCore.md activate-site.sh free-port.sh
 git commit -m "CI: Integración inicial de DeployCore"
 git push origin main
 ```
@@ -179,7 +179,7 @@ deploy-api.sh
 .env
 setup-dockerization.sh
 DeployCore.md
-activaSitio.sh
+activate-site.sh
 ```
 
 #### 3.2 Confirmar los cambios
@@ -333,7 +333,7 @@ deploy-api.sh
 setup-dockerization.sh
 DeployCore.md
 .env
-activaSitio.sh
+activate-site.sh
 Dockerfile
 docker-compose.yml
 ```
@@ -357,7 +357,7 @@ docker-compose.yml
 | ✅ Dockerfile                     | Imagen base del servicio                                                 |
 | ✅ docker-compose.yml             | Orquestación de contenedores                                             |
 | ✅ Makefile                       | Comandos automatizados                                                   |
-| ✅ Scripts de despliegue          | setup-webhook.sh, activaSitio.sh, deploy-api.sh, etc.                    |
+| ✅ Scripts de despliegue          | setup-webhook.sh, activate-site.sh, deploy-api.sh, etc.                    |
 | ✅ .env.template                  | Plantilla con las variables de entorno necesarias                       |
 | ✅ Documentación                  | README.md, instrucciones de despliegue y uso                            |
 | ✅ Rama main actualizada          | Código validado listo para producción                                   |
@@ -402,7 +402,7 @@ Asegúrate de tener los siguientes paquetes instalados:
 | `setup-webhook.sh`       | Script para configurar webhook de despliegue automático desde Git.          |
 | `Dockerfile`             | Define la imagen base de la aplicación.                                     |
 | `docker-compose.yml`     | Orquesta todos los servicios del proyecto.                                  |
-| `activaSitio.sh`         | Activa configuración de Nginx para el sitio.                                |
+| `activate-site.sh`         | Activa configuración de Nginx para el sitio.                                |
 | `deploy-api.sh`          | Script opcional para desplegar una API externa adicional.                   |
 | `setup-dockerization.sh` | Automatiza la creación de archivos base para dockerizar un nuevo proyecto.  |
 
@@ -416,7 +416,7 @@ flowchart TD
     A[Conexión SSH a servidor]:::paso --> B[Clonar repositorio]:::paso
     B --> C[Copiar .env.template a .env]:::paso --> D[Editar variables .env]:::paso
     D --> E[Asignar puertos disponibles]:::paso --> F[Levantar contenedor]:::paso
-    F --> G[Configurar Nginx con activaSitio.sh]:::paso
+    F --> G[Configurar Nginx con activate-site.sh]:::paso
     G --> H[Certbot para SSL]:::paso --> I[Ejecutar setup-webhook.sh]:::paso
 ```
 
@@ -426,11 +426,11 @@ flowchart TD
 1. Conéctate al servidor vía SSH.
 2. Dirígete al directorio donde están alojadas las páginas:
    ```bash
-   cd /var/www/CD_WEB/
+   cd /var/www/WEB/
    ```
-3. Clona el repositorio:
+3. Clona el repositorio, se comienda el uso de ssh:
    ```bash
-   git clone https://turepo.com/usuario/proyecto.git
+   git clone git@github.com:usuario/repositorio.git
    cd proyecto
    ```
 
@@ -445,10 +445,18 @@ nano .env
 
 ### ⚙️ 3. Asignación de Puertos
 
-1. Ejecuta el script para obtener puertos disponibles:
+1. Ejecuta el script para obtener puertos disponibles, cuando se ejecute el sh te pedira de quie tipo de entorrno quieres conocer puertos qa/prod:
+   
    ```bash
-   ./puerto-disponible.sh
+   ./free-port.sh
    ```
+   o si usas make
+
+   ```bash
+   make ports
+   ```
+   Esto desplegará tu sitio en el puerto local definido.
+
 2. Modifica tu `Dockerfile` y `docker-compose.yml` con los puertos obtenidos.
 
 ---
@@ -474,13 +482,19 @@ nano .env
    ```bash
    cd /etc/nginx/sites-available/
    ```
-2. Activa la configuración del sitio:
+2. Activa la configuración del sitio se requiere(sin espacios), nombre de sitio, puerto de salida, puerto local de aplicacion:
    ```bash
-   sudo ./activaSitio.sh nombre-del-config
+   sudo ./activate-site.sh <nombre_sitio> <puerto_externo> <puerto_local>
    ```
 
-   Si el sh activaSitio.sh  no esta en el directorio podra copiar el que se encuentra en el directorio del repositorio activaSitio.sh 
+   Si el sh activate-site.sh  no esta en el directorio podra copiar el que se encuentra en el directorio del repositorio activate-site.sh 
 ---
+
+#### 🔍 Ejemplos:
+```bash
+sudo ./activate-site.sh MyWEB 50001 90001
+```
+
 
 #### 🔐 Certificados SSL
 
@@ -599,10 +613,10 @@ El sistema de despliegue automatizado mediante webhook está **configurado para 
 | ✅ SSH al servidor                | Acceso al servidor de despliegue                                            |
 | ✅ Clonar el repositorio          | Desde GitHub/GitLab, en /var/www/WEB/<proyecto>                         |
 | ✅ Copiar .env.template           | Renombrar a .env y llenar con datos reales                                 |
-| ✅ Asignar puertos disponibles    | Usar puerto-disponible.sh para evitar conflictos                           |
+| ✅ Asignar puertos disponibles    | Usar free-port.sh para evitar conflictos                           |
 | ✅ Configurar Dockerfile          | Ajustar puertos, rutas si es necesario                                     |
 | ✅ Ejecutar make up o docker-compose | Levantar el contenedor                                                 |
-| ✅ Configurar Nginx               | Usar activaSitio.sh o editar sites-available manualmente                  |
+| ✅ Configurar Nginx               | Usar activate-site.sh o editar sites-available manualmente                  |
 | ✅ Instalar certificado SSL       | Usar certbot para HTTPS                                                    |
 | ✅ Ejecutar setup-webhook.sh      | Para automatizar el redeploy por Git                                       |
 | ✅ Configurar Webhook en Git      | Crear URL en GitHub/GitLab con el token generado                           |
