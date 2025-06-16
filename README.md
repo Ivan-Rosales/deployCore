@@ -19,11 +19,12 @@
 2. [🛠️ Comandos disponibles (Makefile)](#comandos-disponibles-makefile)
 3. [📦 Requisitos Previos Paquetes por Rol](#requisitos-previos)
 4. [🌀 Ciclo Completo de Proyecto con DeployCore](#ciclo-completo)
-5. [👨‍💻 Para Desarrolladores](#desarrolladores)
-6. [🧰 Para Administradores de Servidor de Despliegue](#admin-server)
-7. [📌 Notas](#notas)
-8. [✅ Buenas Prácticas en Commits](#buenas-practicas-en-commits)
-9. [👤 Autor](#autor)
+5. [👨‍💻 Para Lider de Proyecto](#liderProyecto)
+6. [👨‍💻 Para Desarrolladores](#desarrolladores)
+7. [🧰 Para Administradores de Servidor de Despliegue](#admin-server)
+8. [📌 Notas](#notas)
+9. [✅ Buenas Prácticas en Commits](#buenas-practicas-en-commits)
+10. [👤 Autor](#autor)
 
 ---
 
@@ -34,18 +35,25 @@ A continuación se describe la estructura principal de un proyecto
 
 ```text
 myproject/
-├── front/                       # Aplicación Frontend
-├── backend/                     # Aplicación Backend
-├── static/                      # Archivos estáticos
-├── docs/                        # Documentación
-├── .gitignore                   # Exclusión de archivos en Git
-├── README.md                    # Documentación principal
-├── .env.template                # Plantilla de variables de entorno
-├── Makefile                     # Automatización con Make
-├── docker-compose.yml           # Orquestación local
-├── Dockerfile                   # Imagen base del proyecto
-├── setup-webhook.sh             # Script de configuración de webhook
-└── setup-webhook.sh.sig         # Firma para validar integridad del script
+   ├── backend/                     # Aplicación Backend
+   |     └── README.md              # Documentacion de directorio
+   ├── docs/                        # Documentación
+   |     └── README.md              # Documentacion de directorio
+   ├── frontend/                    # Aplicación Frontend
+   |     └── README.md              # Documentacion de directorio
+   ├── static/                      # Archivos estáticos
+   |     ├── .env.template          # Plantilla de variables de entorno
+   |     └── README.md              # Documentacion de directorio
+   ├── .gitignore                   # Exclusión de archivos en Git
+   ├── activaSitio.sh               # Script para dar de alta aplicacion en Nginx
+   ├── Makefile                     # Automatización con Make
+   ├── puerto-disponible.sh         # Script para buscar puertos libres en servidor
+   ├── docker-compose.yml           # Orquestación local
+   ├── Dockerfile                   # Imagen base del proyecto
+   ├── README.md                    # Documentación principal
+   ├── setup-dockerization          # Script de creacion de archivos Docker (solo para proyectos DJANGO)
+   ├── setup-webhook.sh             # Script de configuración de webhook
+   └── setup-webhook.sh.sig         # Firma para validar integridad del script
 ```
 
 ---
@@ -81,29 +89,129 @@ myproject/
 ```mermaid
 flowchart TD
     classDef paso fill:#e0f7fa,stroke:#00acc1,stroke-width:2px;
+
+    subgraph "🚀 Lider de Proyecto"
+        A[Crear repositorio Git]:::paso --> B[Clonar DeployCore]:::paso --> C[Copiar estructura base]:::paso
+        C --> D[Push inicial a main]:::paso --> E[Agregar .gitignore]:::paso --> F[Crear rama develop]:::paso
+        F --> G[Enviar estructura al equipo de desarrollo]:::paso
+    end
     subgraph "🐣 Desarrollo"
-        A[Crear repo Git]:::paso --> B[Crear rama develop]:::paso --> C[Clonar en local]:::paso
-        C --> D[Inicializar git flow]:::paso --> E[Crear feature]:::paso --> F[Estructura proyecto]:::paso
-        F --> G[Agregar Dockerfile]:::paso --> H[Test local docker-compose]:::paso
+        G --> H[Crear repositorio en Git]:::paso --> I[Crear rama develop]:::paso --> J[Clonar en local]:::paso
+        J --> K[Inicializar git flow]:::paso --> L[Crear feature/estructura base]:::paso --> M[Agregar Dockerfile y .env]:::paso
+        M --> N[Probar docker-compose local]:::paso --> O[Hacer push a develop]:::paso
     end
-
-    subgraph "🚀 Integración"
-        H --> I[Clonar DeployCore]:::paso --> J[Integrar scripts Makefile/Webhook]:::paso
-        J --> K[Push develop]:::paso --> L[SSH a servidor]:::paso
-    end
-
-    subgraph "🔧 Servidor"
-        L --> M[Clonar repo en /var/www/WEB/]:::paso
-        M --> N[Ejecutar puerto-disponible.sh]:::paso
-        N --> O[Configurar Dockerfile y compose]:::paso
-        O --> P[Levantar contenedor]:::paso
-        P --> Q[Configurar Nginx con activaSitio.sh]:::paso
-        Q --> R[Ejecutar setup-webhook.sh]:::paso
-        R --> S[Configurar webhook en Git]:::paso --> T[✔ Proyecto desplegado]:::paso
+    subgraph "🚀 Producción"
+        O --> P[SSH al servidor]:::paso --> Q[Clonar repo en /var/www/]:::paso
+        Q --> R[Crear .env desde template]:::paso --> S[Asignar puertos libres]:::paso
+        S --> T[Configurar y ejecutar make up]:::paso --> U[Activar sitio Nginx]:::paso
+        U --> V[Instalar certificado SSL]:::paso --> W[Ejecutar setup-webhook.sh]:::paso --> X[Configurar webhook Git]:::paso
+        X --> Y[✔ Proyecto desplegado]:::paso
     end
 ```
 
 ---
+
+## 🚀 Preparación Inicial del Proyecto <a name="liderProyecto"></a> 
+**Responsable: Líder de Proyecto**
+
+Este proceso debe ser realizado **únicamente por el líder de proyecto**, quien se encargará de:
+
+- Crear el repositorio desde cero
+- Integrar los scripts y estructura de **DeployCore**
+- Realizar las configuraciones iniciales necesarias
+- Dejar la rama `develop` lista para uso del equipo de desarrollo
+
+---
+
+### 🧭 Flujo para Líder de Proyecto
+
+```mermaid
+flowchart TD
+    classDef paso fill:#fff9c4,stroke:#fbc02d,stroke-width:2px;
+    A[Crear repositorio Git]:::paso --> B[Clonar DeployCore]:::paso --> C[Copiar estructura base]:::paso
+    C --> D[Push inicial a main]:::paso --> E[Agregar .gitignore]:::paso --> F[Crear rama develop]:::paso
+    F --> G[Enviar estructura al equipo de desarrollo]:::paso
+
+```
+
+### 🔧 1. Crear Repositorio y Rama Principal (`main`)
+
+1. Crear un nuevo repositorio vacío en tu plataforma Git (GitHub, GitLab, etc.).
+2. Clonarlo en tu máquina local:
+```bash
+git clone https://turepo.com/usuario/proyecto.git
+cd proyecto
+```
+
+---
+
+### ⚙️ 2. Integrar DeployCore al Repositorio (en rama `main`)
+
+#### 2.1 Clonar y copiar archivos base de DeployCore
+
+```bash
+git clone https://github.com/GtrujilloTS/deployCore.git temp-folder
+mv temp-folder/* .
+rm -rf temp-folder
+```
+
+#### 2.2 Agregar y confirmar los archivos iniciales
+
+```bash
+git add Makefile setup-webhook.sh setup-webhook.sh.sig deploy-api.sh setup-dockerization.sh DeployCore.md activaSitio.sh puerto-disponible.sh
+git commit -m "CI: Integración inicial de DeployCore"
+git push origin main
+```
+
+---
+
+### 🛡️ 3. Configurar `.gitignore` para excluir scripts sensibles
+
+> ⚠️ **Importante**: Algunos archivos del entorno de despliegue requieren permisos especiales en el servidor. Tras su integración inicial, deben excluirse del control de versiones para evitar conflictos o errores de permisos.
+
+#### 3.1 Agregar al `.gitignore`:
+
+```
+Makefile
+setup-webhook.sh
+setup-webhook.sh.sig
+deploy-api.sh
+.env
+setup-dockerization.sh
+DeployCore.md
+activaSitio.sh
+```
+
+#### 3.2 Confirmar los cambios
+
+```bash
+git add .gitignore
+git commit -m "CI: Ignorar archivos sensibles tras integración inicial"
+git push origin main
+```
+
+---
+
+### 🌱 4. Crear la Rama de Desarrollo (`develop`)
+
+Una vez que la rama `main` ya contiene toda la estructura base del proyecto, crea la rama `develop`, la cual será utilizada por los desarrolladores para comenzar a trabajar:
+
+```bash
+git checkout -b develop
+git push -u origin develop
+```
+
+---
+
+### ✅ Resultado Final
+
+Después de completar estos pasos, el repositorio estará listo con:
+
+- Rama `main`: Contiene la estructura base del proyecto y los scripts de DeployCore (ya ignorados en `.gitignore`)
+- Rama `develop`: Lista para que los desarrolladores comiencen a trabajar en nuevas funcionalidades
+
+> 🧭 A partir de aquí, el equipo de desarrollo puede clonar el repositorio y seguir trabajando sobre `develop` usando Git Flow.
+
 
 ## 👨‍💻 Para Desarrolladores <a name="desarrolladores"></a>
 
@@ -130,96 +238,24 @@ flowchart TD
 ```mermaid
 flowchart TD
     classDef paso fill:#f1f8e9,stroke:#8bc34a,stroke-width:2px;
-    A[Clonar repositorio]:::paso --> B[Ejecutar make init]:::paso --> C[Copiar .env.template a .env]:::paso
-    C --> D[Agregar código fuente]:::paso --> E[Pruebas con docker-compose]:::paso --> F[Commit y push a develop]:::paso
+    A[Clonar repositorio develop]:::paso --> B[Iniciar git flow]:::paso --> C[Crear feature]:::paso
+    C --> D[Estructurar proyecto]:::paso --> E[Agregar Dockerfile, compose y .env]:::paso
+    E --> F[Levantar entorno local con make]:::paso --> G[Finalizar feature y push a develop]:::paso
 ```
 
-
-### 🔧 1. Crear Repositorio y Rama de Desarrollo
-
-1. Crear un repositorio en tu plataforma de Git (GitHub, GitLab, etc.).
-2. Clonar el repositorio a tu máquina local:
-```bash
-git clone https://turepo.com/usuario/proyecto.git
-cd proyecto
-```
-3. Crear la rama `develop` y subirla:
-```bash
-git checkout -b develop
-git push -u origin develop
-```
-
----
-
-### 🌿 2. Usar Git Flow para Gestión de Ramas
+### 🌿 1. Descargar Proyecto y usar Git Flow para Gestión de Ramas
 
 1. Inicializa git flow si aún no lo has hecho:
-```bash
+```bash 
+git clone https://turepo.com/usuario/proyecto.git
+cd proyecto
 git flow init
 ```
    Usa las configuraciones por defecto (o personaliza según tu flujo).
 
 ---
 
-### 🧪 3. Integración DeployCore
-#### 1️⃣ Crear una nueva rama de feature DeployCore:
-```bash
-git flow feature start DeployCore
-```
-
-#### 2️⃣ Clonar DeployCore
-    ```bash
-    git clone https://github.com/GtrujilloTS/deployCore.git temp-folder  # Repo Actual
-    mv temp-folder/* .
-    rm -rf temp-folder
-    ```
-
-
-#### 3️⃣ Hacer Commit y Push del Script
-
-Guarda el script en el repositorio con:
-
-```bash
-git add  Makefile setup-webhook.sh setup-webhook.sh.sig deploy-api.sh setup-dockerization.sh DeployCore.md activaSitio.sh 
-git commit -m "CI:Agregar scriptS para deploy"
-```
-#### 4️⃣ Finalizar una nueva rama de feature DeployCore:
-```bash
-git flow feature finish DeployCore
-git push origin develop
-```
-#### 5️⃣ Crear una nueva rama de feature para gitignoreDeployCore:
-```bash
-git flow feature start gitignoreDeployCore
-```
-
-#### 6️⃣ Ignorar el Script de DeployCore en `.gitignore`
-
-Agrega la siguiente línea a tu archivo `.gitignore`:
-
-```
-Makefile 
-setup-webhook.sh 
-setup-webhook.sh.sig 
-deploy-api.sh 
-.env
-setup-dockerization.sh 
-DeployCore.md
-activaSitio.sh 
-```
-
-📌 **Importante:** Los scripts requieren permisos especiales en el servidor, por lo tanto es mejor mantenerlo fuera del control de versiones después del primer uso para evitar conflictos con Git.
-
-
-#### 7️⃣ Finalizar una nueva rama de feature gitignoreDeployCore:
-```bash
-git flow feature finish gitignoreDeployCore
-git push origin develop
-```
-
----
-
-### 🛡️ 4. Configurar el archivo `.env`
+### 🛡️ 2. Configurar el archivo `.env`
 Se recomienda guardar datos sencibles en archivo `.env` en cual debe ser proporcionado al admin del servidor con los datos necesarios para un ambiente productivo o QA
 
 - Usa el archivo `.env.template` como base:
@@ -242,17 +278,21 @@ Este archivo **no se debe versionar**. Debe ser entregado manualmente al adminis
 
 ---
 
-### 🐳 5. Estructura del Proyecto y Dockerización
+### 🐳 3. Estructura del Proyecto y Dockerización
 
-1. **Define la estructura base del proyecto** según el lenguaje o framework utilizado (por ejemplo: Node.js, Python, Django, etc.).
+1. Inicializa tu rama de feature:
+   ```bash
+   git flow feature start CodeInitial
+   ```
+2. **Define la estructura base del proyecto** según el lenguaje o framework utilizado (por ejemplo: Node.js, Python, Django, etc.).
 
-2. **Genera los archivos de contenerización:**
+3. **Genera los archivos de contenerización:**
    - Si tu proyecto es Django, puedes usar el script `setup-dockerization.sh` incluido en el repositorio para generar automáticamente:
      - `Dockerfile`
      - `docker-compose.yml`
    - Para otros entornos, deberás crear estos archivos manualmente según las necesidades del proyecto.
 
-3. **Verifica el entorno local:**
+4. **Verifica el entorno local:**
    - Asegúrate de que el contenedor se construye y se ejecuta correctamente antes de entregar o hacer push:
      ```bash
      docker-compose up --build
@@ -267,11 +307,11 @@ Este archivo **no se debe versionar**. Debe ser entregado manualmente al adminis
 
 ---
 
-### 🚀 6. Subir Cambios a la Rama `develop`
+### 🚀 4. Subir Cambios a la Rama `develop`
 
 1. Finaliza tu rama de feature:
    ```bash
-   git flow feature finish nombre-feature
+   git flow feature finish CodeInitial
    ```
 
 2. Sube los cambios a `develop`:
@@ -281,7 +321,7 @@ Este archivo **no se debe versionar**. Debe ser entregado manualmente al adminis
 
 ---
 
-### 🗂️ 7. Ignorar Archivos Dockerizados en `.gitignore`
+### 🗂️ 5. Ignorar Archivos Dockerizados en `.gitignore`
 
 Agrega las siguientes líneas a tu archivo `.gitignore` para evitar subir archivos que pueden necesitar ser personalizados en el servidor:
 
