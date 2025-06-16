@@ -1,12 +1,26 @@
-# 📘 DeployCore
+<H1 align="center">📘 DeployCore</H1>
+
+<div align="center">
+
+  <img src="https://img.shields.io/badge/status-active-success.svg">
+  <img src="https://img.shields.io/badge/license-MIT-green">
+  <img src="https://img.shields.io/github/v/release/GtrujilloTS/deployCore">
+  <img src="https://img.shields.io/badge/autor-Giovanni%20Trujillo%20Silvas-purple">
+  <img src="https://img.shields.io/github/last-commit/GtrujilloTS/deployCore">
+
+</div>
+
+
 <h4>
 ✨ DeployCore es una plantilla base diseñada para estandarizar y automatizar el ciclo de vida de desarrollo y despliegue de proyectos, sin importar el lenguaje o tecnología utilizada. Este entorno proporciona una estructura modular y escalable que integra buenas prácticas de DevOps, incluyendo scripts para CI/CD, contenedores Docker, configuración de hooks para despliegue automático, y utilidades de automatización mediante Makefile.
  
- Está dividido en dos enfoques complementarios:
+ Está dividido en tres enfoques complementarios:
+
+ 👨‍💻 **Para lideres de proyecto**: guia para preparar un nuevo repositorio utilizando la plantilla base DeployCore. Incluye la creación del repositorio, la integración de scripts esenciales, la configuración de archivos ignorados por Git y la preparación de las ramas main y develop para el trabajo colaborativo del equipo de desarrollo.
+
+ 👨‍💻 **Para desarrolladores**: guía para integrar correctamente su proyecto a la plantilla DeployCore, asegurando que el entorno se configure de forma adecuada para un despliegue automatizado y sin errores en producción. Incluye la configuración de ramas con Git Flow, uso de variables de entorno, preparación del entorno Docker y recomendaciones para mantener una estructura limpia y compatible con los flujos de integración continua.
  
- 👨‍💻 **Para desarrolladores**: guía paso a paso para estructurar un nuevo proyecto, integrarlo con esta plantilla, definir su entorno local y preparar su código para despliegues automatizados.
- 
- 🧰 **Para administradores de servidores**:proporciona instrucciones claras para configurar entornos de producción, instalar paquetes esenciales, exponer servicios con Nginx, y asegurar aplicaciones con certificados SSL.
+ 🧰 **Para administradores de servidores**: proporciona instrucciones claras para configurar entornos de producción, instalar paquetes esenciales, exponer servicios con Nginx, y asegurar aplicaciones con certificados SSL.
 
  DeployCore facilita la colaboración entre desarrollo y operaciones, reduciendo tiempos de integración y eliminando configuraciones manuales innecesarias.
 </h4>
@@ -19,7 +33,7 @@
 2. [🛠️ Comandos disponibles (Makefile)](#comandos-disponibles-makefile)
 3. [📦 Requisitos Previos Paquetes por Rol](#requisitos-previos)
 4. [🌀 Ciclo Completo de Proyecto con DeployCore](#ciclo-completo)
-5. [👨‍💻 Para Lider de Proyecto](#liderProyecto)
+5. [👨‍💻 Para Lider de Proyecto](#lider-proyecto)
 6. [👨‍💻 Para Desarrolladores](#desarrolladores)
 7. [🧰 Para Administradores de Servidor de Despliegue](#admin-server)
 8. [📌 Notas](#notas)
@@ -111,7 +125,7 @@ flowchart TD
 
 ---
 
-## 🚀 Preparación Inicial del Proyecto <a name="liderProyecto"></a> 
+## 👨‍💻 Lider del Proyecto <a name="lider-proyecto"></a> 
 **Responsable: Líder de Proyecto**
 
 Este proceso debe ser realizado **únicamente por el líder de proyecto**, quien se encargará de:
@@ -212,6 +226,7 @@ Después de completar estos pasos, el repositorio estará listo con:
 
 > 🧭 A partir de aquí, el equipo de desarrollo puede clonar el repositorio y seguir trabajando sobre `develop` usando Git Flow.
 
+---
 
 ## 👨‍💻 Para Desarrolladores <a name="desarrolladores"></a>
 
@@ -242,6 +257,25 @@ flowchart TD
     C --> D[Estructurar proyecto]:::paso --> E[Agregar Dockerfile, compose y .env]:::paso
     E --> F[Levantar entorno local con make]:::paso --> G[Finalizar feature y push a develop]:::paso
 ```
+---
+
+### 📋 Checklist de Entregables del Desarrollador al Admin del Servidor
+
+| Item                              | Detalles                                                                 |
+|-----------------------------------|--------------------------------------------------------------------------|
+| ✅ Código del proyecto            | Backend, frontend y archivos necesarios                                 |
+| ✅ Dockerfile                     | Imagen base del servicio                                                 |
+| ✅ docker-compose.yml             | Orquestación de contenedores                                             |
+| ✅ Makefile                       | Comandos automatizados                                                   |
+| ✅ Scripts de despliegue          | setup-webhook.sh, activate-site.sh, deploy-api.sh, etc.                    |
+| ✅ .env.template                  | Plantilla con las variables de entorno necesarias                       |
+| ✅ Documentación                  | README.md, instrucciones de despliegue y uso                            |
+| ✅ Rama main actualizada          | Código validado listo para producción                                   |
+| ✅ Validación local               | Confirmar que el contenedor levanta correctamente antes de entregarlo   |
+
+🔐 **Importante**: el archivo `.env` real **no debe versionarse**, debe enviarse de forma privada (correo, mensajería segura, etc.).
+
+---
 
 ### 🌿 1. Descargar Proyecto y usar Git Flow para Gestión de Ramas
 
@@ -261,7 +295,7 @@ Se recomienda guardar datos sencibles en archivo `.env` en cual debe ser proporc
 - Usa el archivo `.env.template` como base:
 
 ```bash
-cp .env.template ../.env
+cp .env.template .env
 ```
 
 EJemplo
@@ -348,26 +382,6 @@ docker-compose.yml
 
 ---
 
-
-### 📋 Checklist de Entregables del Desarrollador al Admin del Servidor
-
-| Item                              | Detalles                                                                 |
-|-----------------------------------|--------------------------------------------------------------------------|
-| ✅ Código del proyecto            | Backend, frontend y archivos necesarios                                 |
-| ✅ Dockerfile                     | Imagen base del servicio                                                 |
-| ✅ docker-compose.yml             | Orquestación de contenedores                                             |
-| ✅ Makefile                       | Comandos automatizados                                                   |
-| ✅ Scripts de despliegue          | setup-webhook.sh, activate-site.sh, deploy-api.sh, etc.                    |
-| ✅ .env.template                  | Plantilla con las variables de entorno necesarias                       |
-| ✅ Documentación                  | README.md, instrucciones de despliegue y uso                            |
-| ✅ Rama main actualizada          | Código validado listo para producción                                   |
-| ✅ Validación local               | Confirmar que el contenedor levanta correctamente antes de entregarlo   |
-
-🔐 **Importante**: el archivo `.env` real **no debe versionarse**, debe enviarse de forma privada (correo, mensajería segura, etc.).
-
----
-
-
 ## 🧰 Para Administradores de Servidor de Despliegue <a name="admin-server"></a>
 
 ### 🔧 Requisitos Previos
@@ -419,6 +433,22 @@ flowchart TD
     F --> G[Configurar Nginx con activate-site.sh]:::paso
     G --> H[Certbot para SSL]:::paso --> I[Ejecutar setup-webhook.sh]:::paso
 ```
+---
+
+### 🔧 Checklist para el Administrador del Servidor
+
+| Paso                              | Descripción                                                                 |
+|-----------------------------------|-----------------------------------------------------------------------------|
+| ✅ SSH al servidor                | Acceso al servidor de despliegue                                            |
+| ✅ Clonar el repositorio          | Desde GitHub/GitLab, en /var/www/WEB/<proyecto>                         |
+| ✅ Copiar .env.template           | Renombrar a .env y llenar con datos reales                                 |
+| ✅ Asignar puertos disponibles    | Usar free-port.sh para evitar conflictos                           |
+| ✅ Configurar Dockerfile          | Ajustar puertos, rutas si es necesario                                     |
+| ✅ Ejecutar make up o docker-compose | Levantar el contenedor                                                 |
+| ✅ Configurar Nginx               | Usar activate-site.sh o editar sites-available manualmente                  |
+| ✅ Instalar certificado SSL       | Usar certbot para HTTPS                                                    |
+| ✅ Ejecutar setup-webhook.sh      | Para automatizar el redeploy por Git                                       |
+| ✅ Configurar Webhook en Git      | Crear URL en GitHub/GitLab con el token generado                           |
 
 ---
 
@@ -431,7 +461,7 @@ flowchart TD
 3. Clona el repositorio, se comienda el uso de ssh:
    ```bash
    git clone git@github.com:usuario/repositorio.git
-   cd proyecto
+   cd repositorio
    ```
 
 ### ⚙️ 2. **Configura variables de entorno:**
@@ -450,7 +480,7 @@ nano .env
    ```bash
    ./free-port.sh
    ```
-   o si usas make
+   o usando make
 
    ```bash
    make ports
@@ -467,7 +497,7 @@ nano .env
    ```bash
    docker-compose up -d --build
    ```
-    o si usas make
+    o usando make
 
     ```bash
     make up
@@ -478,23 +508,27 @@ nano .env
 
 ### 🌐 5. Configuración Nginx o el proxy reverso con los archivos incluidos.
 
-1. Ve a:
-   ```bash
-   cd /etc/nginx/sites-available/
-   ```
-2. Activa la configuración del sitio se requiere(sin espacios), nombre de sitio, puerto de salida, puerto local de aplicacion:
-   ```bash
+1. Activa la configuración del sitio utilizando el nombre del sitio (sin espacios), el puerto externo para Nginx y el puerto local de la aplicación::
+   ```bash  
    sudo ./activate-site.sh <nombre_sitio> <puerto_externo> <puerto_local>
-   ```
+   ```  
+   o usando make
 
-   Si el sh activate-site.sh  no esta en el directorio podra copiar el que se encuentra en el directorio del repositorio activate-site.sh 
----
+   ```bash
+   make site MyWEB <nombre_sitio> <puerto_externo> <puerto_local>
+   ```
 
 #### 🔍 Ejemplos:
-```bash
-sudo ./activate-site.sh MyWEB 50001 90001
-```
 
+   ```bash
+   sudo ./activate-site.sh MyWEB 50001 90001
+   ```
+   o usando make
+
+   ```bash
+   make site MyWEB 50001 90001
+   ```
+   Esto desplegará tu sitio en los puertos indicados utilizando la configuración de Nginx incluida.
 
 #### 🔐 Certificados SSL
 
@@ -527,7 +561,6 @@ make setup-webhook                  # Usará la rama 'main' (por defecto)
 
 ✅ Ideal para levantar el hook en ramas como `develop` para entornos de pruebas, o `main` para entornos de producción.
 
----
 
 #### 🛠️ Opción B: Ejecución Manual
 
@@ -605,24 +638,6 @@ El sistema de despliegue automatizado mediante webhook está **configurado para 
 
 ---
 
-
-### 🔧 Checklist para el Administrador del Servidor
-
-| Paso                              | Descripción                                                                 |
-|-----------------------------------|-----------------------------------------------------------------------------|
-| ✅ SSH al servidor                | Acceso al servidor de despliegue                                            |
-| ✅ Clonar el repositorio          | Desde GitHub/GitLab, en /var/www/WEB/<proyecto>                         |
-| ✅ Copiar .env.template           | Renombrar a .env y llenar con datos reales                                 |
-| ✅ Asignar puertos disponibles    | Usar free-port.sh para evitar conflictos                           |
-| ✅ Configurar Dockerfile          | Ajustar puertos, rutas si es necesario                                     |
-| ✅ Ejecutar make up o docker-compose | Levantar el contenedor                                                 |
-| ✅ Configurar Nginx               | Usar activate-site.sh o editar sites-available manualmente                  |
-| ✅ Instalar certificado SSL       | Usar certbot para HTTPS                                                    |
-| ✅ Ejecutar setup-webhook.sh      | Para automatizar el redeploy por Git                                       |
-| ✅ Configurar Webhook en Git      | Crear URL en GitHub/GitLab con el token generado                           |
-
----
-
 ## 📌 Notas <a name="notas"></a>
 Este proyecto está pensado como punto de partida. Puedes extenderlo con pruebas automatizadas, análisis de calidad, o integración con servicios en la nube.
 
@@ -648,7 +663,6 @@ Basado en el flujo de trabajo [GitFlow](https://www.atlassian.com/es/git/tutoria
 ## 👤 Autor
 Proyecto desarrollado por:  
 **[Giovanni Trujillo Silvas](https://github.com/GtrujilloTS)**  
-Licencia: **MIT**
 
 ---
 
