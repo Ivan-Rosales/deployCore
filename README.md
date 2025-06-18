@@ -514,7 +514,7 @@ nano .env
 ---
 
 
-### 🌐 5. Configuración Nginx o el proxy reverso con los archivos incluidos.
+### 🌐 5. Configuración Nginx o el proxy inverso con los archivos incluidos.
 
 1. Activa la configuración del sitio utilizando el nombre del sitio (sin espacios), el puerto externo para Nginx y el puerto local de la aplicación::
    ```bash  
