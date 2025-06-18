@@ -58,16 +58,18 @@ myproject/
    ├── static/                      # Archivos estáticos
    |     ├── .env.template          # Plantilla de variables de entorno
    |     └── README.md              # Documentacion de directorio
+   ├── ci/                          # Archivos de CI/CD
+   |     ├── activate-site.sh       # Script para dar de alta aplicacion en Nginx
+   |     ├── deploy-api             # 
+   |     ├── free-port.sh           # Script para buscar puertos libres en servidor
+   |     ├── setup-dockerization    # Script de creacion de archivos Docker (solo para proyectos DJANGO)
+   |     └── setup-webhook.sh       # Script de configuración de webhook
    ├── .gitignore                   # Exclusión de archivos en Git
-   ├── activate-site.sh             # Script para dar de alta aplicacion en Nginx
    ├── Makefile                     # Automatización con Make
-   ├── free-port.sh                 # Script para buscar puertos libres en servidor
    ├── docker-compose.yml           # Orquestación local
    ├── Dockerfile                   # Imagen base del proyecto
-   ├── README.md                    # Documentación principal
-   ├── setup-dockerization          # Script de creacion de archivos Docker (solo para proyectos DJANGO)
-   ├── setup-webhook.sh             # Script de configuración de webhook
-   └── setup-webhook.sh.sig         # Firma para validar integridad del script
+   └── README.md                    # Documentación principal
+
 ```
 
 ---
@@ -83,6 +85,10 @@ myproject/
 | `make logs`           | Muestra logs en tiempo real                         |
 | `make clean`          | Limpia volúmenes y contenedores huérfanos           |
 | `make rebuild`        | Reconstruye imágenes Docker sin caché               |
+| `make ports`            | Ejecuta script para encontrar y mostrar un puerto libre        |
+| `make dockerization`    | Prepara estructura y configuración de dockerización            |
+| `make service-local-api`| Despliega la API como servicio local con configuración mínima  |
+| `make site-nginx <sitio> <puerto_ext> <puerto_local>` | Configura el sitio en Nginx con proxy inverso  |
 | `make setup-webhook`  | Instala Webhook para redeploy de app                |
 
 ---
@@ -165,14 +171,15 @@ cd proyecto
 
 ```bash
 git clone https://github.com/GtrujilloTS/deployCore.git temp-folder
-mv temp-folder/* .
+mv temp-folder/!(README.md) .
+mv temp-folder/README.md README_DEPLOY.md
 rm -rf temp-folder
 ```
 
 #### 2.2 Agregar y confirmar los archivos iniciales
 
 ```bash
-git add Makefile setup-webhook.sh setup-webhook.sh.sig deploy-api.sh setup-dockerization.sh DeployCore.md activate-site.sh free-port.sh
+git add Makefile setup-webhook.sh deploy-api.sh setup-dockerization.sh DeployCore.md activate-site.sh free-port.sh
 git commit -m "CI: Integración inicial de DeployCore"
 git push origin main
 ```
@@ -186,9 +193,9 @@ git push origin main
 #### 3.1 Agregar al `.gitignore`:
 
 ```
+ci/
 Makefile
 setup-webhook.sh
-setup-webhook.sh.sig
 deploy-api.sh
 .env
 setup-dockerization.sh
@@ -360,6 +367,7 @@ Este archivo **no se debe versionar**. Debe ser entregado manualmente al adminis
 Agrega las siguientes líneas a tu archivo `.gitignore` para evitar subir archivos que pueden necesitar ser personalizados en el servidor:
 
 ```
+ci/
 Makefile
 setup-webhook.sh
 setup-webhook.sh.sig
@@ -541,7 +549,6 @@ sudo certbot --nginx -d dominio.com
 ### 🪝 6. Configuración del Webhook
 
 Puedes configurar el webhook utilizando el `Makefile` provisto en este repositorio (opción recomendada) o de forma manual.
-
 
 #### ⚙️ Opción A: Usar el `Makefile`
 

@@ -1,7 +1,12 @@
 #!/bin/bash
 
+# Obtener nombre de la app basado en la carpeta
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FOLDER_NAME="$(basename "$SCRIPT_DIR")"
+
+# BASE_DIR es una carpeta atrás de donde está el script (la raíz del proyecto)
+BASE_DIR="$(dirname "$SCRIPT_DIR")"
+
+FOLDER_NAME="$(basename "$BASE_DIR")"
 API_ID="django$FOLDER_NAME.service"
 PORT_START=8000
 PORT_END=8999
@@ -26,19 +31,19 @@ echo "📡 Puerto local disponible encontrado: $PORT_LOCAL"
 
 # Crear entorno virtual e instalar dependencias
 echo "🛠️  Creando entorno virtual..."
-python3 -m venv "$SCRIPT_DIR/venv"
+python3 -m venv "$BASE_DIR/venv"
 
 echo "⬆️  Activando entorno virtual y actualizando pip..."
-source "$SCRIPT_DIR/venv/bin/activate"
+source "$BASE_DIR/venv/bin/activate"
 pip install --upgrade pip
 
 # Instalar dependencias necesarias
-if [ -f "$SCRIPT_DIR/pyproject.toml" ]; then
+if [ -f "$BASE_DIR/pyproject.toml" ]; then
     echo "📦 Instalando con pyproject.toml..."
     pip install .
-elif [ -f "$SCRIPT_DIR/requirements.txt" ]; then
+elif [ -f "$BASE_DIR/requirements.txt" ]; then
     echo "📦 Instalando con requirements.txt..."
-    pip install -r "$SCRIPT_DIR/requirements.txt"
+    pip install -r "$BASE_DIR/requirements.txt"
 else
     echo "❌ No se encontró pyproject.toml ni requirements.txt"
     exit 1
@@ -55,8 +60,8 @@ Description=Django Web Server
 After=network.target
 
 [Service]
-ExecStart=${SCRIPT_DIR}/venv/bin/python manage.py runserver ${PORT_LOCAL}
-WorkingDirectory=${SCRIPT_DIR}
+ExecStart=${BASE_DIR}/venv/bin/python manage.py runserver ${PORT_LOCAL}
+WorkingDirectory=${BASE_DIR}
 User=sistemasweb
 Group=sistemasweb
 Restart=always

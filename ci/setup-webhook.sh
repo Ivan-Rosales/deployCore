@@ -15,7 +15,11 @@ OWNER_USER="root"
 
 # Obtener nombre de la app basado en la carpeta
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_ID="webhook-$(basename "$SCRIPT_DIR" | sed 's/[^a-zA-Z0-9_]/_/g')"
+
+# BASE_DIR es una carpeta atrás de donde está el script (la raíz del proyecto)
+BASE_DIR="$(dirname "$SCRIPT_DIR")"
+
+APP_ID="webhook-$(basename "$BASE_DIR" | sed 's/[^a-zA-Z0-9_]/_/g')"
 
 # Valida si la rama es diferente de main para concatener al ID de la app
 if [ "$BRANCH" != "main" ]; then
@@ -29,8 +33,6 @@ DEPLOY_SCRIPT="$HOOKS_DIR/${APP_ID}.sh"
 ENV_FILE="$HOOKS_DIR/.env"
 SERVICE_FILE="/etc/systemd/system/webhook.service"
 LOG_FILE="$HOOKS_DIR/logs/${APP_ID}.log"
-
-
 
 # Validar herramientas necesarias
 for cmd in git docker docker-compose jq openssl; do
@@ -62,7 +64,7 @@ set -euo pipefail
 
 LOGFILE="${LOG_FILE}"
 MAX_SIZE=10000
-PROJECT_DIR="${SCRIPT_DIR}"
+PROJECT_DIR="${BASE_DIR}"
 
 mkdir -p "\$(dirname "\$LOGFILE")"
 touch "\$LOGFILE"
@@ -202,7 +204,7 @@ EOF
 fi
 
 # Se añade directorio como un "safe directory" para Git
-sudo -u "$OWNER_USER" git config --global --add safe.directory "$SCRIPT_DIR"
+sudo -u "$OWNER_USER" git config --global --add safe.directory "$BASE_DIR"
 
 sudo chown "$OWNER_USER":"$OWNER_USER" $HOOKS_DIR
 sudo chown "$OWNER_USER":"$OWNER_USER" $SERVICE_FILE
