@@ -22,9 +22,21 @@ rebuild:
 
 ports:
 	@echo "🔓 Otorgando permisos de ejecución al script..."
-	sudo chmod +x free-port.sh	
+	sudo chmod +x ci/free-port.sh	
 	@echo "🚧 Ejecutando script de free ports..."
-	sudo ./free-port.sh;
+	sudo ./ci/free-port.sh;
+
+dockerization:
+	@echo "🔓 Otorgando permisos de ejecución al script..."
+	sudo chmod +x ci/setup-dockerization.sh	
+	@echo "🚧 Ejecutando script de setup dockerization..."
+	sudo ./ci/setup-dockerization.sh;
+
+service-local-api:
+	@echo "🔓 Otorgando permisos de ejecución al script..."
+	sudo chmod +x ci/deploy-api.sh	
+	@echo "🚧 Ejecutando script de setup deploy api..."
+	sudo ./ci/deploy-api.sh;
 
 site-nginx:
 	@if [ "$(filter-out $@,$(MAKECMDGOALS))" = "" ]; then \
@@ -39,21 +51,20 @@ site-nginx:
 		exit 1; \
 	fi; \
 	echo "🔓 Otorgando permisos de ejecución al script..."; \
-	sudo chmod +x activate-site.sh; \
+	sudo chmod +x ci/activate-site.sh; \
 	echo "🚧 Ejecutando script de activar sitio..."; \
-	sudo ./activate-site.sh $$nombre_sitio $$puerto_externo $$puerto_local
-
+	sudo ./ci/activate-site.sh $$nombre_sitio $$puerto_externo $$puerto_local
 %:
 	@:
 # Hooks
 setup-webhook:
 	@echo "🔓 Otorgando permisos de ejecución al script..."
-	sudo chmod +x setup-webhook.sh
+	sudo chmod +x ci/setup-webhook.sh
 	@echo "🚧 Ejecutando script de setup webhook..."
 	@if [ -z "$(branch)" ]; then \
 		echo "Usando rama por defecto: main"; \
-		sudo ./setup-webhook.sh; \
+		sudo ./ci/setup-webhook.sh; \
 	else \
 		echo "Usando rama: $(branch)"; \
-		sudo ./setup-webhook.sh $(branch); \
+		sudo ./ci/setup-webhook.sh $(branch); \
 	fi

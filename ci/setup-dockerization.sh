@@ -10,8 +10,11 @@
 DOCKERFILE="Dockerfile"
 COMPOSEFILE="docker-compose.yml"
 DOCKERIGNORE=".dockerignore"
+# Obtener nombre de la app basado en la carpeta
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-API_ID="$(basename "$SCRIPT_DIR" | sed 's/[^a-zA-Z0-9_]/_/g')"
+# BASE_DIR es una carpeta atrás de donde está el script (la raíz del proyecto)
+BASE_DIR="$(dirname "$SCRIPT_DIR")"
+API_ID="$(basename "$BASE_DIR" | sed 's/[^a-zA-Z0-9_]/_/g')"
 PORT_START=8000
 PORT_END=8999
 
