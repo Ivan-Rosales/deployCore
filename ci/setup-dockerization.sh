@@ -183,8 +183,6 @@ echo "✅ Dockerfile generado."
 echo "🛠️ Generando archivo $COMPOSEFILE..."
 
 cat <<EOF > $COMPOSEFILE
-version: '3.9'
-
 services:
   api:
     container_name: "$API_ID"
